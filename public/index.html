@@ -143,11 +143,19 @@ Arithmetic {
       // Allow the version of the ohm-js package to be specified via a query param.
       const params = new URLSearchParams(window.location.search);
       const ohmVersion = params.get('ohm-js') || '17';
-      document.write(
-        // eslint-disable-next-line no-useless-escape
-        `<script src="https://unpkg.com/ohm-js@${ohmVersion}/dist/ohm.min.js"><\/script>
-         <script src="https://unpkg.com/ohm-js@${ohmVersion}/dist/ohm-extras.js"><\/script>`
-      );
+      if (ohmVersion == "local") {
+        document.write(
+          // eslint-disable-next-line no-useless-escape
+          `<script src="/dist/ohm.js"><\/script>
+          <script src="/dist/ohm-extras.js"><\/script>`
+        );
+      } else {
+        document.write(
+          // eslint-disable-next-line no-useless-escape
+          `<script src="https://unpkg.com/ohm-js@${ohmVersion}/dist/ohm.min.js"><\/script>
+          <script src="https://unpkg.com/ohm-js@${ohmVersion}/dist/ohm-extras.js"><\/script>`
+        );
+      }
     </script>
     <script src="third_party/d3.min.js"></script>
     <script src="third_party/codemirror-5.65.12/codemirror.min.js"></script>
