@@ -89,6 +89,8 @@ export default {
 
         if (el === highlightEl) {
           self.renderHighlight(el);
+        } else if (el.classList.contains('correction')) {
+          self.renderSkipRegion(el);
         }
 
         if (
@@ -174,6 +176,20 @@ export default {
       };
       this.inputCtx.fillStyle = '#B5D5FF';
       this.inputCtx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    },
+
+    // Tint the input that a recovered failure skipped over.
+    renderSkipRegion(el) {
+      const elBounds = el.getBoundingClientRect();
+      const pixelRatio = this.getPixelRatio();
+      const baseRect = $('#expandedInputWrapper').getBoundingClientRect();
+      const x = (elBounds.left - baseRect.left) * pixelRatio;
+      const width = (elBounds.right - elBounds.left) * pixelRatio;
+      const {height} = $('#expandedInput');
+      this.inputCtx.fillStyle = 'rgba(255, 193, 7, 0.28)';
+      this.inputCtx.fillRect(x, 0, width, height);
+      this.inputCtx.fillStyle = '#c68a00';
+      this.inputCtx.fillRect(x, height - 2 * pixelRatio, width, 2 * pixelRatio);
     },
 
     getConsumedInput(el) {

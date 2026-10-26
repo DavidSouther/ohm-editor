@@ -48,6 +48,12 @@ export function getProblems(result) {
   }));
 }
 
+// A stable key for a recovered failure, shared by the trace and the match result.
+export function failureKey(failure) {
+  const {startIdx, endIdx} = failure.interval;
+  return `${startIdx}:${endIdx}:${failure.position}`;
+}
+
 // The status of an example: 'pass', 'fail' or 'recovered' (matched, but only
 // by recovering from errors).
 export function exampleStatusClass(result, shouldMatch) {

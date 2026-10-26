@@ -29,6 +29,7 @@ import * as cmUtil from '../cmUtil.js';
 import * as domUtil from '../domUtil.js';
 import {isLeaf} from '../traceUtil.js';
 import ohmEditor from '../ohmEditor.js';
+import {failureKey} from '../recovery.js';
 
 import expandedInput from './expanded-input.vue';
 import parseResults from './parse-results.vue';
@@ -126,6 +127,7 @@ export default {
       }
     });
     ohmEditor.addListener('unpeek:ruleDefinition', clearMarks);
+    ohmEditor.addListener('goto:recoveredFailure', this.selectRecoveredFailure);
     this.$nextTick(this.resetStepControls);
   },
   updated() {
@@ -192,8 +194,25 @@ export default {
     measureInputText(text) {
       return this.$refs.expandedInput.measureText(text);
     },
+    // Make the correction for a recovered failure the current parse step.
+    selectRecoveredFailure(failure) {
+      const key = failureKey(failure);
+      const el = domUtil
+        .$$('#visualizerBody .pexpr.correction')
+        .find(
+          el =>
+            el._traceNode && failureKey(el._traceNode.recoveredFailure) === key
+        );
+      if (el) {
+        this._stepControls.stepInto(el);
+        el.scrollIntoView({block: 'nearest', inline: 'nearest'});
+      }
+    },
     resetStepControls() {
       this._stepControls.reset(domUtil.$('#visualizerBody'));
+      // Resetting can reveal nodes that were hidden for stepping, so redraw
+      // the input once they are shown.
+      this.$nextTick(() => this.$refs.expandedInput.update());
     },
   },
 };

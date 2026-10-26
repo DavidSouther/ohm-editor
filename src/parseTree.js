@@ -4,23 +4,28 @@ import CheckedEmitter from 'checked-emitter';
 import Vue from 'vue/dist/vue.common.js';
 
 import ParseTree from './components/parse-tree.vue';
+import ProblemsPanel from './components/problems-panel.vue';
 import ohmEditor from './ohmEditor.js';
+import {getProblems} from './recovery.js';
 
 const parseTree = (ohmEditor.parseTree = new CheckedEmitter());
 parseTree.vue = new Vue({
   data: {
     parsing: false,
     trace: null,
+    problems: [],
   },
   el: '#visualizerContainer',
   components: {
     'parse-tree': ParseTree,
+    'problems-panel': ProblemsPanel,
   },
   template: `
     <div id="visualizerContainer">
       <div class="section-head flex-row">
         <h2>Parse</h2>
       </div>
+      <problems-panel :source="problems" />
       <parse-tree :rootTrace="trace" />
       <div v-show="parsing" class="overlay"></div>
     </div>
@@ -37,6 +42,7 @@ parseTree.vue = new Vue({
     // Refresh the parse tree after attempting to parse the input.
     ohmEditor.addListener('parse:input', (matchResult, trace) => {
       this.parsing = false;
+      this.problems = Object.freeze(getProblems(trace.result));
       this.trace = Object.freeze(trace);
     });
   },
