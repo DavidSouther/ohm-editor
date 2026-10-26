@@ -54,10 +54,8 @@ test('the recover toggle marks the example as matched with recovered errors', as
 }) => {
   await loadBlocksGrammar(page, TWO_MISTAKES);
 
-  // Recovery is opt-in for capable builds.
-  await expect(recoverToggle(page)).not.toBeChecked();
-  await expect(exampleItem(page)).toHaveClass(/\bfail\b/);
-  await recoverToggle(page).check();
+  // Recovery starts enabled for capable builds.
+  await expect(recoverToggle(page)).toBeChecked();
   await expect(exampleItem(page)).toHaveClass(/\brecovered\b/);
   await expect(exampleItem(page)).toHaveAttribute(
     'title',

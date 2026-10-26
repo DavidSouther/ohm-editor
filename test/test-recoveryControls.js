@@ -5,16 +5,16 @@ import * as assert from 'uvu/assert';
 import {initializeRecovery} from '../src/recoveryControls.js';
 import {editorMatchOptions} from '../src/recovery.js';
 
-test('capable startup offers an unchecked recovery option', () => {
+test('capable startup enables recovery before the first match', () => {
   const editor = {capabilities: {}, options: {}};
   const list = document.createElement('ul');
   initializeRecovery(editor, {pexprs: {Fallible() {}}}, list);
   assert.is(editor.capabilities.recover, true);
-  assert.is(list.querySelector('input').checked, false);
-  assert.is(editor.options.recover, false);
-  assert.is(editorMatchOptions(editor), undefined);
-  editor.options.recover = true;
+  assert.is(list.querySelector('input').checked, true);
+  assert.is(editor.options.recover, true);
   assert.equal(editorMatchOptions(editor), {recover: true});
+  editor.options.recover = false;
+  assert.is(editorMatchOptions(editor), undefined);
 });
 
 test('released startup omits the control and the options argument', () => {

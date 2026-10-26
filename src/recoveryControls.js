@@ -7,9 +7,9 @@ export function initializeRecovery(editor, ohmLib, optionsList) {
   if (editor.capabilities.recover) {
     const li = createElement('li');
     li.innerHTML =
-      '<input type="checkbox" name="recover" id="recoverOption" />' +
+      '<input type="checkbox" name="recover" id="recoverOption" checked />' +
       '<label for="recoverOption">Recover from errors</label>';
     optionsList.appendChild(li);
-    editor.options.recover = false;
+    editor.options.recover = true;
   }
 }
