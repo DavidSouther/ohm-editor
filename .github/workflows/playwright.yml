@@ -19,6 +19,11 @@ jobs:
         run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+      - name: Prepare local Ohm fixture
+        run: |
+          mkdir public/dist
+          cp node_modules/ohm-js/dist/ohm.js public/dist/
+          cp node_modules/ohm-js/dist/ohm-extras.js public/dist/
       - name: Run Playwright tests
         if: ${{ !startsWith(github.head_ref, 'update-snapshots/') }}
         run: npm run test:e2e

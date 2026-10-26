@@ -3,6 +3,9 @@
 // @ts-check
 const {defineConfig, devices} = require('@playwright/test');
 
+// The dev server port; override with OHM_EDITOR_PORT when 8080 is taken.
+const port = Number(process.env.OHM_EDITOR_PORT || 8080);
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -39,7 +42,7 @@ module.exports = defineConfig({
     actionTimeout: 0,
 
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:8080',
+    baseURL: `http://localhost:${port}`,
 
     screenshot: 'only-on-failure',
 
@@ -91,9 +94,9 @@ module.exports = defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run start',
-    port: 8080,
-    timeout: 5 * 1000,
+    command: `npm run start -- --port ${port}`,
+    port,
+    timeout: 30 * 1000,
     reuseExistingServer: !process.env.CI,
   },
 });
