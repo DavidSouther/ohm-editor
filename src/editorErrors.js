@@ -3,11 +3,15 @@
 import {markInterval} from './cmUtil.js';
 import {createElement} from './domUtil.js';
 import ohmEditor from './ohmEditor.js';
+import {getProblems} from './recovery.js';
 
 const errorMarks = {
   grammar: null,
   input: null,
 };
+
+// The skip region tints and failure markers of every recovered failure.
+let recoveryMarks = [];
 
 function hideError(category, editor) {
   const errInfo = errorMarks[category];
@@ -79,12 +83,20 @@ ohmEditor.addListener('change:grammarEditor', cm => {
   hideError('grammar', cm);
 });
 
-const hideInputError = _ => hideError('input', ohmEditor.ui.inputEditor);
+const hideInputError = _ => {
+  hideError('input', ohmEditor.ui.inputEditor);
+  clearRecoveredFailures();
+};
 
 // Hide errors in the input in all cases where the input will be reparsed.
 ohmEditor.addListener('change:inputEditor', hideInputError);
 ohmEditor.addListener('change:grammars', hideInputError);
 ohmEditor.addListener('set:startRule', hideInputError);
+ohmEditor.addListener('change:option', optionName => {
+  if (optionName === 'recover') {
+    hideInputError();
+  }
+});
 
 ohmEditor.addListener(
   'parse:grammars',
@@ -101,6 +113,7 @@ ohmEditor.addListener(
   }
 );
 ohmEditor.addListener('parse:input', (matchResult, trace) => {
+  markRecoveredFailures(ohmEditor.ui.inputEditor, getProblems(trace.result));
   if (trace.result.failed()) {
     const editor = ohmEditor.ui.inputEditor;
     // Intervals with start == end won't show up in CodeMirror.
@@ -110,3 +123,32 @@ ohmEditor.addListener('parse:input', (matchResult, trace) => {
     setError('input', editor, interval, createErrorEl(trace.result));
   }
 });
+
+// Mark each recovered failure in `problems`: tint its skip region and put a
+// marker at its failure position. Clears the marks from the previous call.
+// When recovery cannot finish, the original failure keeps the ordinary error mark.
+export function markRecoveredFailures(editor, problems) {
+  clearRecoveredFailures();
+  problems
+    .filter(p => p.kind === 'recovered')
+    .forEach(({interval, position, message}) => {
+      if (interval.endIdx > interval.startIdx) {
+        recoveryMarks.push(
+          markInterval(editor, interval, 'recovered-interval', false)
+        );
+      }
+      const marker = createElement('span.recovery-marker');
+      marker.title = message;
+      recoveryMarks.push(
+        editor.setBookmark(editor.posFromIndex(position), {
+          widget: marker,
+          insertLeft: true,
+        })
+      );
+    });
+}
+
+function clearRecoveredFailures() {
+  recoveryMarks.forEach(mark => mark.clear());
+  recoveryMarks = [];
+}

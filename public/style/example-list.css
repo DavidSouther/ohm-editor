@@ -41,6 +41,15 @@
   background-color: var(--color-warning-3);
 }
 
+.example-count.recovered:not(.fail) {
+  background-color: var(--color-warning-1);
+  color: var(--button-text-color);
+}
+
+.example-count.recovered:not(.fail):hover {
+  background-color: var(--color-warning-2);
+}
+
 .example-count.fail {
   background-color: var(--color-failure-1);
   color: white;
@@ -114,6 +123,11 @@
 
 #exampleList .example.pass code {
   border-left: 4px solid var(--color-success-1);
+}
+
+/* Matched, but only by recovering from errors. */
+#exampleList .example.recovered code {
+  border-left: 4px solid var(--color-warning-3);
 }
 
 #exampleList .example.pendingUpdate code {

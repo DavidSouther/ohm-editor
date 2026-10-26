@@ -41,7 +41,9 @@ const grammarDef = String.raw`
     lenientCaseName = "--" whitespace? name
 
     // TODO: Move this into the main grammar (?)
-    operator += "..." | ".." | "|" | "#"
+    // "!" is in the base rule from ohm-js 17.5 with Fallible; listing it here
+    // highlights the recovery operator with older builds too.
+    operator += "..." | ".." | "|" | "#" | "!"
     punctuation += "(" | ")" | "{" | "}"
 
     // Whitespace should not match across lines, since CodeMirror doesn't

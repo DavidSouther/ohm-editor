@@ -3,6 +3,8 @@
 
 import {$, $$, createElement} from './domUtil.js';
 import ohmEditor from './ohmEditor.js';
+import {editorMatchOptions} from './recovery.js';
+import {initializeRecovery} from './recoveryControls.js';
 
 // TODO: Ideally these modules wouldn't do all their work as side effects.
 import './editorErrors.js';
@@ -22,6 +24,8 @@ let grammarMatcher = ohm.ohmGrammar.matcher();
 const urlParams = new URLSearchParams(window.location.search);
 
 const enableInlineExamples = urlParams.get('examples') === 'inline';
+
+initializeRecovery(ohmEditor, ohm, $('#options ul'));
 
 // Helpers
 // -------
@@ -116,7 +120,10 @@ function refresh() {
   if (currentGrammar) {
     const startRule = getValidStartRule(currentGrammar, ohmEditor.startRule);
     if (startRule) {
-      const trace = currentGrammar.trace(inputSource, startRule);
+      const options = editorMatchOptions(ohmEditor);
+      const trace = options
+        ? currentGrammar.trace(inputSource, startRule, options)
+        : currentGrammar.trace(inputSource, startRule);
 
       // When the input fails to parse, turn on "show failures" automatically.
       if (showFailuresImplicitly) {

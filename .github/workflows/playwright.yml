@@ -21,9 +21,13 @@ jobs:
         run: npx playwright install --with-deps
       - name: Prepare local Ohm fixture
         run: |
+          echo '89546e8f6507eafafcfc5133e9cd6caaa1a32a0269738174e70da13d6d7024e0  test/data/ohm-js-fallible.tgz' | sha256sum --check
+          fixture_dir=$(mktemp -d)
+          tar -xzf test/data/ohm-js-fallible.tgz -C "$fixture_dir"
           mkdir public/dist
-          cp node_modules/ohm-js/dist/ohm.js public/dist/
-          cp node_modules/ohm-js/dist/ohm-extras.js public/dist/
+          cp "$fixture_dir/package/dist/ohm.js" public/dist/
+          cp "$fixture_dir/package/dist/ohm-extras.js" public/dist/
+          rm -rf "$fixture_dir"
       - name: Run Playwright tests
         if: ${{ !startsWith(github.head_ref, 'update-snapshots/') }}
         run: npm run test:e2e

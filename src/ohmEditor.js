@@ -53,6 +53,9 @@ ohmEditor.registerEvents({
 ohmEditor.grammars = null;
 ohmEditor.options = {};
 
+// What the loaded Ohm build can do. Set at startup by index.js.
+ohmEditor.capabilities = {recover: false};
+
 ohmEditor.currentGrammar = null;
 ohmEditor.startRule = '';
 
