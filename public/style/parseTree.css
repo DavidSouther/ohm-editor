@@ -189,3 +189,23 @@
   flex-direction: column;
   overflow: hidden;
 }
+
+/*
+  Error recovery (`B ! C`). Recovered things are amber; outright failures stay red.
+ */
+.pexpr.fallible.recovered > .self .label {
+  background-color: #ffecb3;
+  border-bottom-color: #ffc107;
+  color: #5c4100;
+}
+.pexpr.correction > .self .label,
+.pexpr.correction > .self .label:hover {
+  background: repeating-linear-gradient(
+    135deg,
+    #fff3cd 0 4px,
+    #ffe08a 4px 8px
+  );
+  border-bottom: 1px solid #c68a00;
+  color: #5c4100;
+  cursor: help;
+}

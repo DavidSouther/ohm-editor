@@ -31,6 +31,7 @@ const template = `
             :id="id"
             :key="id"
             :class="classesForExample(id)"
+            :title="titleForExample(id)"
             @mousedown="handleMouseDown"
             @dblclick="handleDblClick"
           >
@@ -62,6 +63,7 @@ const template = `
 import * as domUtil from '../domUtil.js';
 import ExampleEditor from './example-editor.js';
 import ohmEditor from '../ohmEditor.js';
+import {editorMatchOptions, exampleStatusClass} from '../recovery.js';
 import ThumbsUpButton from './thumbs-up-button.js';
 
 import Vue from 'vue/dist/vue.common.js';
@@ -100,7 +102,8 @@ export default Vue.component('example-list', {
       editMode: '',
       exampleValues: Object.create(null),
 
-      // Maps an example id to a string: either 'pass' or 'fail'.
+      // Maps an example id to a status object whose className is 'pass', 'fail'
+      // or 'recovered' (matched only by recovering from errors).
       exampleStatus: Object.create(null),
 
       // Indicates that the user is editing an example, but the change hasn't been committed yet.
@@ -176,6 +179,13 @@ export default Vue.component('example-list', {
         classes[this.exampleStatus[id].className] = true;
       }
       return classes;
+    },
+    titleForExample(id) {
+      const status = this.exampleStatus[id];
+      if (status && status.className === 'recovered') {
+        return 'Matched with recovered errors';
+      }
+      return undefined;
     },
     handleAddClick(e) {
       this.addExample();
@@ -362,8 +372,11 @@ export default Vue.component('example-list', {
           : ohmEditor.defaultGrammar();
         if (g) {
           try {
-            const matched = g.match(text, startRule).succeeded();
-            status = {className: matched === shouldMatch ? 'pass' : 'fail'};
+            const options = editorMatchOptions(ohmEditor);
+            const result = options
+              ? g.match(text, startRule, options)
+              : g.match(text, startRule);
+            status = {className: exampleStatusClass(result, shouldMatch)};
           } catch (e) {
             status = {className: 'fail', err: e};
           }
@@ -433,6 +446,11 @@ export default Vue.component('example-list', {
         this.setGrammars(grammars);
       }
     );
+    ohmEditor.addListener('change:option', optionName => {
+      if (optionName === 'recover') {
+        Object.keys(this.exampleValues).forEach(this.updateExampleStatus);
+      }
+    });
     ohmEditor.addListener('change:inputEditor', source => {
       // Don't indicate that input is pending if the user just changed the selected example.
       if (!this._isSelectionChanging) {

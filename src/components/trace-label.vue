@@ -46,6 +46,13 @@ export default {
       if (this.traceNode.terminatesLR) {
         return {text: '[Grow LR]'};
       }
+      if (this.traceNode.isCorrection) {
+        const {interval, shortMessage} = this.traceNode.recoveredFailure;
+        return {
+          text: '_correction',
+          tooltip: `Skipped ${JSON.stringify(interval.contents)}. ${shortMessage}`,
+        };
+      }
       if (this.inlineRuleNameParts.length > 1) {
         return {
           text: this.inlineRuleNameParts[0],

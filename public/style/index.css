@@ -232,6 +232,40 @@ h2 {
   border-bottom: 1px dashed #c7254e;
 }
 
+/* A skip region: input that error recovery skipped over. */
+.CodeMirror .recovered-interval {
+  background-color: rgba(255, 193, 7, 0.24);
+  border-bottom: 1px dashed #c68a00;
+}
+
+/* The failure position of a recovered error: a caret-like bar with a flag. */
+.CodeMirror .recovery-marker {
+  display: inline-block;
+  height: 1em;
+  position: relative;
+  vertical-align: text-bottom;
+  width: 0;
+}
+.CodeMirror .recovery-marker::before {
+  background-color: #d97706;
+  border-radius: 1px;
+  bottom: -2px;
+  content: '';
+  left: -1px;
+  position: absolute;
+  top: -1px;
+  width: 2px;
+}
+.CodeMirror .recovery-marker::after {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #d97706;
+  content: '';
+  left: -4px;
+  position: absolute;
+  top: -3px;
+}
+
 .CodeMirror.highlighting {
   color: rgba(51, 51, 51, 0.8);
 }

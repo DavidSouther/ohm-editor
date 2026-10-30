@@ -41,6 +41,10 @@ ohmEditor.registerEvents({
   // no matching 'unpeek:failure'.
   'goto:failure': ['failure'],
 
+  // Emitted when the user selects a recovered failure (a RecoveredFailure from
+  // \`getRecoveredFailures()\`), for example in the problems panel.
+  'goto:recoveredFailure': ['failure'],
+
   // Emitted when the user indicates they want to preview a rule definition, e.g. when
   // hovering over a node in the visualizer.
   'peek:ruleDefinition': ['grammar', 'ruleName'],
@@ -52,6 +56,9 @@ ohmEditor.registerEvents({
 
 ohmEditor.grammars = null;
 ohmEditor.options = {};
+
+// What the loaded Ohm build can do. Set at startup by index.js.
+ohmEditor.capabilities = {recover: false};
 
 ohmEditor.currentGrammar = null;
 ohmEditor.startRule = '';

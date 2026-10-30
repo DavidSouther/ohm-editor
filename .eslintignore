@@ -3,3 +3,4 @@
 build/*
 test/data/har/**
 test/snapshots/**
+public/dist

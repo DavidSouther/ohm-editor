@@ -344,4 +344,50 @@ test('editor - thumbs up button', async () => {
   assert.is(vm.exampleStatus[id].className, 'pass'); // passes after toggling
 });
 
+test('matched with recovered errors', async () => {
+  const {vm} = wrapper;
+  await flushQueue(); // Let the grammar edit from before.each settle.
+  const id = vm.addExample();
+
+  // A grammar whose match recovers from one error when asked to, standing in
+  // for an Ohm build with Fallible.
+  const calls = [];
+  const grammars = ohm.grammars('G { start = letter* }');
+  const realMatch = grammars.G.match.bind(grammars.G);
+  grammars.G.match = (text, startRule, options) => {
+    calls.push(options);
+    const result = realMatch(text, startRule);
+    const recovered = options && options.recover ? [{position: 0}] : [];
+    result.getRecoveredFailures = () => recovered;
+    return result;
+  };
+
+  ohmEditor.capabilities.recover = true;
+  ohmEditor.options.recover = true;
+  try {
+    await ohmEditor.emit('change:grammars', '');
+    await Vue.nextTick();
+    await ohmEditor.emit('parse:grammars', null, grammars, [], null);
+    await flushQueue();
+
+    assert.equal(calls[calls.length - 1], {recover: true});
+    assert.is(vm.exampleStatus[id].err, undefined);
+    assert.is(vm.exampleStatus[id].className, 'recovered');
+    const li = findEl(vm, 'li');
+    assert.ok(li.classList.contains('recovered'));
+    assert.is(li.title, 'Matched with recovered errors');
+
+    // Turning recovery off re-checks every example without the option.
+    ohmEditor.options.recover = false;
+    await ohmEditor.emit('change:option', 'recover');
+    await flushQueue();
+    assert.is(calls[calls.length - 1], undefined);
+    assert.is(vm.exampleStatus[id].className, 'pass');
+    assert.is(li.title, '');
+  } finally {
+    ohmEditor.capabilities.recover = false;
+    ohmEditor.options.recover = false;
+  }
+});
+
 test.run();

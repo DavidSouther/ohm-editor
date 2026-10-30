@@ -35,7 +35,7 @@ export async function selectArithmeticGrammar(page) {
 
 export async function loadEditorWithArithmeticGrammar(page) {
   await initNetworkReplay(page);
-  await page.goto('http://localhost:8080/');
+  await page.goto('/');
   await expect(page).toHaveTitle(/Ohm Editor/);
   await selectArithmeticGrammar(page);
 }

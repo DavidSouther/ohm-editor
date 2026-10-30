@@ -38,7 +38,12 @@
 /* eslint-disable no-invalid-this */
 import {$} from '../domUtil.js';
 import {scrollToInterval} from '../cmUtil.js';
-import {isLeaf} from '../traceUtil.js';
+import {
+  childrenWithRecovery,
+  containsRecovery,
+  isFallible,
+  isLeaf,
+} from '../traceUtil.js';
 import ohmEditor from '../ohmEditor.js';
 import traceLabel from './trace-label.vue';
 
@@ -105,6 +110,9 @@ function isSyntactic(expr) {
   }
   if (expr instanceof ohm.pexprs.Seq) {
     return expr.factors.some(isSyntactic);
+  }
+  if (isFallible(expr)) {
+    return isSyntactic(expr.guarded) || isSyntactic(expr.join);
   }
   return expr instanceof ohm.pexprs.Param;
 }
@@ -203,6 +211,11 @@ export default {
         return true;
       }
 
+      // Keep every recovered error visible.
+      if (containsRecovery(this.traceNode)) {
+        return false;
+      }
+
       // Collapse if the rule body has no source (e.g. anything from ProtoBuiltInRules).
       const pexpr = this.traceNode.expr;
       if (pexpr instanceof ohm.pexprs.Apply) {
@@ -225,6 +238,13 @@ export default {
       }
       obj.collapsed = this.collapsed;
       obj.failed = !this.traceNode.succeeded;
+      if (isFallible(this.traceNode.expr)) {
+        obj.fallible = true;
+        obj.recovered = this.traceNode.isRecovered;
+      }
+      if (this.traceNode.isCorrection) {
+        obj.correction = true;
+      }
       obj.labeled = this.labeled;
       obj.leaf = this.isLeaf;
       obj.currentParseStep = this.isCurrentParseStep;
@@ -243,7 +263,7 @@ export default {
       const children = [];
       const self = this;
 
-      this.traceNode.children.forEach(node => {
+      childrenWithRecovery(this.traceNode).forEach(node => {
         // Don't show or recurse into nodes that failed, unless "Explain parse" is enabled.
         if (
           (!node.succeeded && !ohmEditor.options.showFailures) ||

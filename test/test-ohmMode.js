@@ -102,6 +102,39 @@ test('single-line rule defintions', () => {
   ]);
 });
 
+test('fallible operator', () => {
+  // `B ! C` marks a recovery point; `!` is an operator with or without spaces.
+  assert.equal(simpleTokenize('Stmt=Line!Semi'), [
+    'ruleDef',
+    'operator', // =
+    'variable', // Line
+    'operator', // !
+    'variable', // Semi
+  ]);
+
+  assert.equal(simpleTokenize('Stmt=Line ! Semi'), [
+    'ruleDef',
+    'operator', // =
+    'variable', // Line
+    null,
+    'operator', // !
+    null,
+    'variable', // Semi
+  ]);
+
+  assert.equal(simpleTokenize('Block=Stmt* ! &Close'), [
+    'ruleDef',
+    'operator', // =
+    'variable', // Stmt
+    'operator', // *
+    null,
+    'operator', // !
+    null,
+    'operator', // &
+    'variable', // Close
+  ]);
+});
+
 test('multi-line comments', () => {
   const {token, startState} = createModeFactory(ohm)();
   const state = startState();
